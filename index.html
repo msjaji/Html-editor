@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Scratch - Interactive Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CodePen-style Dark Theme & Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;700&display=swap');
+
+        body {
+            background-color: #131417; /* Main dark background */
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-textarea {
+            resize: none;
+            outline: none;
+            background-color: #1d1e22; /* Panel background */
+            color: #abb2bf; /* Neutral code text color */
+            font-family: 'Fira Code', monospace;
+            tab-size: 4;
+            border: none;
+        }
+
+        /* Syntax-like basic coloring for raw text */
+        .editor-textarea:focus {
+            color: #e5c07b; 
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #131417; }
+        ::-webkit-scrollbar-thumb { background: #444857; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #5a5f73; }
+    </style>
+</head>
+<body class="flex flex-col h-screen text-gray-200">
+
+    <!-- Header -->
+    <header class="bg-[#1e1f26] border-b border-[#34363d] p-3 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-3">
+            <!-- Icon resembling CodePen's style -->
+            <div class="bg-[#47cf73] w-8 h-8 rounded flex items-center justify-center font-bold text-black select-none text-xl">
+                &lt;/&gt;
+            </div>
+            <div>
+                <h1 class="text-lg font-bold leading-tight">HTML Scratch</h1>
+                <p class="text-xs text-gray-400">Grade 7 Computer Technology</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <button id="resetBtn" class="px-4 py-2 bg-[#444857] hover:bg-[#5a5f73] text-white text-sm font-semibold rounded transition shadow-sm">
+                Reset Code
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace: Split Pane -->
+    <div class="flex flex-1 overflow-hidden flex-col md:flex-row bg-[#131417] p-2 gap-2">
+        
+        <!-- Code Editor (Left) -->
+        <div class="w-full md:w-1/2 flex flex-col bg-[#1d1e22] rounded-md overflow-hidden border border-[#34363d] shadow-lg">
+            <div class="bg-[#1d1e22] px-4 py-2 flex justify-between items-center shrink-0 border-b border-[#34363d]">
+                <div class="flex items-center gap-2">
+                    <span class="bg-[#ff3c41] text-white text-xs font-bold px-2 py-1 rounded shadow-sm">HTML</span>
+                </div>
+            </div>
+            <textarea id="codeEditor" spellcheck="false" class="editor-textarea flex-1 p-4 w-full h-full text-sm md:text-base"></textarea>
+        </div>
+
+        <!-- Live Preview (Right) -->
+        <div class="w-full md:w-1/2 flex flex-col bg-white rounded-md overflow-hidden border border-[#34363d] shadow-lg relative">
+            <iframe id="previewFrame" class="w-full flex-1 border-none bg-white"></iframe>
+        </div>
+        
+    </div>
+
+    <script>
+        // --- Core Elements ---
+        const editor = document.getElementById('codeEditor');
+        const preview = document.getElementById('previewFrame');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // --- Boilerplate Setup ---
+        const boilerplateHTML = `<!DOCTYPE html>
+<html>
+<head>
+   <title>Document</title>
+</head>
+<body>
+
+</body>
+</html>`;
+
+        // --- Live Preview Logic ---
+        function updatePreview() {
+            const code = editor.value;
+            preview.srcdoc = code;
+        }
+
+        editor.addEventListener('input', updatePreview);
+
+        // --- Tab Key Support ---
+        editor.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                // Insert 2 spaces for tab
+                this.value = this.value.substring(0, start) + "  " + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 2;
+                updatePreview();
+            }
+        });
+
+        // --- Reset Button ---
+        resetBtn.addEventListener('click', () => {
+            if(confirm("Are you sure you want to reset your code back to the starting boilerplate?")) {
+                editor.value = boilerplateHTML;
+                updatePreview();
+            }
+        });
+
+        // --- App Initialization ---
+        function initApp() {
+            editor.value = boilerplateHTML;
+            
+            // Set cursor position automatically inside the <body> tag for convenience
+            const bodySplit = boilerplateHTML.indexOf("<body>") + 6;
+            editor.focus();
+            editor.setSelectionRange(bodySplit + 1, bodySplit + 1);
+
+            updatePreview();
+        }
+
+        // Start!
+        initApp();
+    </script>
+</body>
+</html>
